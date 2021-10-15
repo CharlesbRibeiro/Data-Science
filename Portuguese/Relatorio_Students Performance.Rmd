@@ -1,0 +1,231 @@
+---
+title: "Relatório sobre a base de dados Student's Performance"
+author: "Charles Barros"
+date: "14/09/2021"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+# **Banco de dados - StudentsPerformance**
+
+# **Contextualização**
+  
+>O banco de dados analisado é um conjunto de dados fictício e deve ser usado apenas para fins de treinamento de ciência de dados. Este conjunto de dados inclui pontuações de três exames e uma variedade de fatores pessoais, sociais e econômicos que têm efeitos de interação sobre eles.
+
+# **O intuito da análise**
+
+> O intuito desse relatório e demostrar alguns conhecimentos com a linguagem de programação R e aplicar alguns conhecimentos adquiridos durante minha jornada acadêmica.
+
+# **Pacotes utilizados**
+
+```{r Pacotes}
+
+library(tidyverse) 
+library(corrplot)
+```
+>O **pacote Tidyverse** é uma coleção de pacotes R projetados para ciência de dados. Todos os pacotes compartilham uma filosofia de design, gramática e estruturas de dados subjacentes. Para mais informações`[Saiba Mais em](https://www.tidyverse.org/)`.  
+
+>O **pacote corrplot** é utilizado para visualizar uma matriz de correlação. Para mais informações`[Saiba mais em] (https://www.rdocumentation.org/packages/corrplot/versions/0.2-0/topics/corrplot)`.
+
+
+# **Codigo R**  
+
+
+
+### **Carregando a base de dados**
+
+```{r carregando codigo}
+
+dados <- read.csv(file = "StudentsPerformance.csv",header = TRUE,sep = ";")
+head(dados, 5)
+
+```
+  
+### **Verificando as variáveis do banco de dados**
+
+``` {r str dados}
+
+str(dados)
+
+```
+  
+### **Verificando se a base apresenta valores ausentes**
+
+```{r null dados}
+
+colSums(is.na(dados))
+
+```
+
+### **Sumario da base dados**
+  
+```{r summary}
+
+summary(dados)
+
+```
+
+### **Tabela dos dados**
+
+``` {r table}
+
+table(dados$gender,dados$race.ethnicity)
+
+table(dados$gender,dados$test.preparation.course)
+
+table(dados$race.ethnicity,dados$test.preparation.course)
+
+table(dados$gender,dados$parental.level.of.education)
+```
+> Através das tabelas conseguimos visualizar a proporção dos gêneros ou etnias por variáveis.
+
+### **Verificando a média das matérias por gênero e etnia**
+
+``` {r média das materias}
+Means_SEX <- dados %>%
+  group_by(gender)%>%
+  summarise_at(vars(math.score,reading.score,writing.score),list(mean = mean));Means_SEX
+
+Means_ethnicity <- dados %>%
+  group_by(race.ethnicity)%>%
+  summarise_at(vars(math.score,reading.score,writing.score),list(mean = mean));Means_ethnicity
+
+```
+> Utilizando o sub pacote (**dpylr**) contido no pacote **tidyverse** conseguimos selecionar as variáveis Scores e agrupar por gênero e etnia, sendo assim conseguimos selecionar a média por gênero e etnia. 
+
+
+### **BOX-PLOT** ###
+
+``` {r box_plot}
+
+dados_scores <- select(dados,reading.score,writing.score,math.score)
+
+box_scores <- boxplot(dados_scores,
+        main = "Box-Plot das notas das materias",
+        xlab = " Matérias",
+        pch  = 16,
+        col = "orange",
+        horizontal = FALSE)
+
+```
+
+> Quando criamos um boxplot conseguimos verificar a distribuição dos dados. Sendo assim conseguimos visualizar onde se encontra o centro dos dados (a média ou mediana), amplitude dos dados (máximo-mínimo). Também conseguimos visualizar se os dados apresentam uma distribuição simétrica ou assimétrica e outliers presentes no conjunto de dados (ou distribuição dos dados).
+
+``` {r informações sobre boxplot}
+
+box_scores
+```
+
+>Quando executamos a variável **box_scores** conseguimos visualizar as características de cada boxplot referente as notas.
+
+### **Verificando a distribuição das notas**
+> Para realizarmos qualquer teste (ou técnica) estatística, devemos verificar a distribuição do conjunto de dados que estamos analisando. Sendo assim podemos utilizar alguns conceitos para verificarmos a distribuição dos dados, podemos utilizar histograma ou até mesmo o boxplot para visualizar a distribuição dos dados através de uma figura, porém não devemos apenas tomar uma decisão através de figura o, sendo assim devemos utilizar teste como por exemplo **teste de Shapiro** para verificarmos se os dados seguem uma distribuição normal.
+
+```{r histograma das notas}
+
+ggplot(dados, aes(math.score)) + 
+  geom_histogram(aes(y=..density..)) + 
+  geom_density(col = "red")+
+  ggtitle('Distribution of Math Score')
+
+ggplot(dados, aes(reading.score)) + 
+  geom_histogram(aes(y=..density..)) + 
+  geom_density(col = "red")+
+  ggtitle('Distribution of reading Score')
+
+ggplot(dados, aes(writing.score)) + 
+  geom_histogram(aes(y=..density..)) + 
+  geom_density(col = "red")+
+  ggtitle('Distribution of writing Score')
+```
+
+> O histograma, também conhecido como distribuição de frequências, é a representação gráfica em colunas ou em barras de um conjunto de dados previamente tabulado e dividido em classes uniformes ou não uniformes. A base de cada retângulo representa uma classe. 
+
+```{r QQ-PLOT}
+
+ggplot(dados_scores,aes(sample=math.score))+
+  stat_qq(shape=19,size=3.5,col='dodgerblue4')+
+  stat_qq_line(lwd=1.5,col='brown1')+
+  labs(y='Quantiles of sample')+
+  labs(x='Quantiles of theoretical')+
+  ggtitle("QQ-Plot Math.Score")
+
+
+ggplot(dados_scores,aes(sample=reading.score))+
+  stat_qq(shape=19,size=3.5,col='dodgerblue4')+
+  stat_qq_line(lwd=1.5,col='brown1')+
+  labs(y='Quantiles of sample')+
+  labs(x='Quantiles of theoretical')+
+  ggtitle("QQ-Plot Reading.Score")
+
+ggplot(dados_scores,aes(sample=writing.score))+
+  stat_qq(shape=19,size=3.5,col='dodgerblue4')+
+  stat_qq_line(lwd=1.5,col='brown1')+
+  labs(y='Quantiles of sample')+
+  labs(x='Quantiles of theoretical')+
+  ggtitle('QQ-Plot Writing Score')
+
+```
+
+> O QQ-Plot é um método gráfico para comparar duas distribuições de probabilidade. Sendo assim e utilizado quando queremos comparar graficamente uma distribuição.
+
+### **Realizando Teste de Shapiro-Wilk**
+
+``` {r shapiro}
+
+a <- shapiro.test(dados$math.score)$p.value
+b <- shapiro.test(dados$reading.score)$p.value
+c <- shapiro.test(dados$writing.score)$p.value
+
+shapiro_score <- c(a,b,c)
+
+shapiro_score < 0.05
+
+```
+> Após utilizar o QQ-plot para verificar se os dados apresentam um comportamento de uma distribuição normal, decidi utilizar o **teste de Shapiro-Wilk** para verificar se os dados apresentam ou não uma distribuição normal. Sendo assim decidi criar uma variável onde contém os **P-Valores** do teste de Shapiro de cada nota, pôs caso o valor do teste seja menor que **5% (ou 0,05) ** então teremos um resultado que demostra que o conjunto de dados não apresenta uma distribuição normal, dessa forma conseguimos visualizar no output do código as palavras **(TRUE TRUE TRUE) **.  
+
+### **Realizando Teste Mann Whitney**
+
+> Uma breve introdução sobre o teste de Mann Whitney é um teste não paramétrico aplicado para duas amostras independentes. Podemos dizer que é a versão do teste t (ou t student) para um conjunto de dados não paramétricos. Sendo assim queremos comparar dois grupos e verificar se existe uma diferença entre esses grupos.
+
+> As hipóteses do teste de Mann Whitney são:  
+  H0: Não existe diferença p > 0,05  
+  H1: existe diferença P < 0,05  
+  A hipótese irá verificar se a mediana dos grupos analisados é diferente.
+
+
+
+``` {r wilcoxon}
+
+wilcox_math.score <- wilcox.test(math.score ~ gender,alternative = "two.sided",data = dados)$p.value
+
+wilcox_reading.score <- wilcox.test(reading.score ~ gender,alternative = "two.sided",data = dados)$p.value
+
+wilcox_writing.score <- wilcox.test(writing.score ~ gender,alternative = "two.sided",data = dados)$p.value
+
+```
+
+> O código acima foi criado 3 variáveis onde são aplicados os testes de Mann Whitney, com o objetivo de verificar a diferença das notas entre os gêneros com base na matéria.
+
+``` {r wilcoxon 2}
+wilcox_p.values <- c(wilcox_math.score, wilcox_reading.score, wilcox_writing.score)
+
+wilcox_p.values < 0.05
+```
+> Quando realizado os testes verificamos que os **P-Valores** do teste realizado para cada respectiva variável, verificamos que os **P-Values** de todos os testes foram abaixo dos **5% (ou 0,05) **, sendo assim os grupos analisados apresentaram uma diferença entre as notas.
+
+### **Matriz de Correlação**
+
+> Uma introdução sobre o tema **correlação** é determinar o grau de relacionamento entre duas variáveis. Vale ressaltar que relacionamento entre duas variáveis não significa casualidade entre uma variável(x) e variável(Y).
+
+``` {r matriz de correlação}
+
+corre <- cor(dados_scores,method="pearson")
+
+corrplot(corre,method = 'number')
+```
+
+> Através da biblioteca **Corrplot** realizamos uma matriz de correlação onde e possível ver a correlação entre as variáveis notas. Dessa forma conseguimos visualizar do lado da matriz correlação uma barra de escala onde é representado o grau de correlação entre as variáveis. Sendo assim quando o valor da matriz de correlação estiver com a cor azul isso que significa que as variáveis comparadas apresentam uma mesma direção de relação. Já quando o valor da matriz de correlação apresentar uma cor vermelha isso significa que as variáveis analisadas apresentam uma direção diferente das relações. Vale ressaltar novamente que correlação não é causalidade e que quaisquer conjuntos de dados que estivermos analisando sempre irá apresentar uma correlação o queremos visualizar e o grau de relação entre essas variáveis.
+

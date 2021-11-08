@@ -1,6 +1,6 @@
 # Data-Science
 
-## English
+## **English**
 ### Description:
 
 In this repository are some of my analyzes involving subjects like data science, mathematics and statistics.
@@ -16,9 +16,9 @@ To assist in viewing the files, below is the description of the files.
 | .pdf  |  Report        |
 
 
-#Portugues
+## **Portugues**
 
-## Descrição:
+### Descrição:
 
 Neste repositório estão algumas das minhas analises envolvendo assuntos como ciência dos dados , matemática e estatística. 
 

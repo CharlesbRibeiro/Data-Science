@@ -21,7 +21,7 @@ To assist in viewing the files, below is the description of the files.
 
 ### Descrição:
 
-Neste repositório estão algumas das minhas analises envolvendo assuntos como ciência dos dados , matemática e estatística. 
+Neste repositório estão algumas das minhas análises envolvendo assuntos como ciência dos dados, matemática e estatística. 
 
 ### Arquivos
 

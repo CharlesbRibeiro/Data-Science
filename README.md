@@ -12,6 +12,7 @@ To assist in viewing the files, below is the description of the files.
 | Files   | Description |
 | ---    | ---       |
 | .R  | Code in the R programming language         |
+| .Py | Code in the Python programming language         |
 | .csv  |  Database       |
 | .pdf  |  Report        |
 
@@ -29,5 +30,6 @@ Para auxiliar na visualização dos arquivos abaixo está a descrição dos arqu
 | Arquivo   | Descrição |
 | ---    | ---       |
 | .R  | Codigo na linguagem de programação R         |
+| .Py  | Codigo na linguagem de programação R         |
 | .csv  |  Banco de dados       |
 | .pdf  |  Relatorio        |

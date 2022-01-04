@@ -30,6 +30,6 @@ Para auxiliar na visualização dos arquivos abaixo está a descrição dos arqu
 | Arquivo   | Descrição |
 | ---    | ---       |
 | .R  | Codigo na linguagem de programação R         |
-| .Py  | Codigo na linguagem de programação R         |
+| .Py  | Codigo na linguagem de programação Python         |
 | .csv  |  Banco de dados       |
 | .pdf  |  Relatorio        |

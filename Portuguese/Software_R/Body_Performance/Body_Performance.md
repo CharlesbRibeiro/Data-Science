@@ -1,0 +1,259 @@
+# **Banco de dados** - Body Performance 
+
+# **Contextualização**
+  
+<font size="4"> São dados que fornecem informações de medição para cada item dos dados nacionais de medição de condicionamento físico gerenciados pela National Sports Promotion Corporation para a comemoração olímpica de Seul.
+
+# **O intuito da análise**
+
+<font size="4"> O intuito desse relatório é apresentar o tema de Regressão Linear múltipla, sendo um modelo de análise utilizado quando modelamos a relação linear entre uma variável resposta e múltiplas variáveis preditoras. 
+
+# **Pacotes utilizados**
+
+```{r message=FALSE} 
+
+library(tidyverse)
+library(psych)
+library(caTools)
+library(corrplot)
+```
+
+<font size="4"> O **Pacote Tidyverse** É uma coleção de pacotes R projetados para ciência de dados. Todos os pacotes compartilham uma filosofia de design, gramática e estruturas de dados subjacentes.Para mais informações`[Saiba Mais em](https://www.tidyverse.org/)`.
+
+<font size="4"> O **Pacote psych**  Funções desse pacote são principalmente para análise multivariada e construção de escala usando análise fatorial, análise de componentes principais, análise de cluster e análise de confiabilidade, embora outras forneçam estatísticas descritivas básicas.`[Saiba Mais em](https://cran.r-project.org/web/packages/psych/index.html)`.
+
+<font size="4"> O **Pacote caTools** Contém várias funções utilitárias básicas, incluindo: funções estatísticas de janela móvel (rolando, em execução), leitura/gravação para arquivos binários GIF e ENVI, cálculo rápido de AUC, classificador LogitBoost, codificador/decodificador base64, soma e cumsum sem erros de arredondamento, etc.`[Saiba Mais em](https://https://www.rdocumentation.org/packages/corrplot/versions/0.92/)`
+
+<font size="4"> O **Pacote corrplot** é utilizado para visualizar uma matriz de correlação. Para mais informações`[Saiba mais em] (https://www.rdocumentation.org/packages/corrplot/versions/0.2-0/topics/corrplot)`.
+
+<p>&nbsp;</p>
+
+### **Carregando a base de dados**
+
+```{r carregando codigo}
+
+df <- read.csv('bodyPerformance.csv',header = TRUE,sep = ',');head(df, 5)
+
+```
+
+<p>&nbsp;</p>
+
+### **Variáveis**
+
+|  Variável |  Descrição |
+|---|---|
+| age  |Idade do indivíduo   |
+| gender  |  Gênero do indivíduo |
+| height_cm  |  Altura do indivíduo  |
+|  weight_kg | Peso do indivíduo |
+|  body.fat_. | Percentual de gordura do corpo |
+|  weight_kg | Peso do indivíduo |
+|  diastolic | Pressão arterial diastólica é o menor valor encontrado durante a medida de pressão arterial. |
+|  Sístole | É o período de contração muscular das câmaras cardíacas que alterna com o período de repouso, diástole. |
+|  gripforce |  Grip force é a força aplicada pela mão para puxar ou suspender objetos e é uma parte específica da força da mão. |
+|  sit and bend forward_cm |  Sentar e dobrar para frente em centímetros |
+|  sit-ups counts |  Contagens de abdominais |
+|  broad jump_cm  |  salto largo em centímetros |
+|  Class  |  Classe (ou Categoria) |
+
+<p>&nbsp;</p>
+
+### **Verificando o formato das variáveis**
+
+```{r}
+
+str(df)
+
+```
+>Através do comando **str**, conseguimos visualizar o formato das variáveis do conjunto de dados **’bodyPerformance.csv’**. Sendo 10 variáveis numéricas e 2 como fator.
+
+<p>&nbsp;</p>
+
+### **Verificando se o conjunto de dados apresenta valores ausentes**
+
+```{r null dados}
+
+colSums(is.na(df))
+
+```
+
+<p>&nbsp;</p>
+
+## **Elaborando um modelo de Regressão linear multipla** 
+
+
+<font size="4">Vamos elaborar um modelo de Regressão linear múltipla para prever o valor da variável **gripForce** (ou força de aperto) com base no conjunto de variáveis contidos no banco de dados **bodyPerformance.csv**. Sendo assim o objetivo é estabelecer uma fórmula matemática entre à variável dependente (Y) e as variáveis independeres (x1,x2,x3...xn).
+
+$$
+\operatorname{y} = \beta_{0} + \beta_{1}(\operatorname{x1}) + \beta_{2}(\operatorname{x2}) +\beta_{n}(\operatorname{n}) + \epsilon
+$$
+
+
+
+|  Variável |  Descrição |
+|---|---|
+| **y**  |O valor previsto da variável dependente|
+| **B0**  |  O intercepto no eixo y (O valor de y quando todos os outros parâmetros são definidos como 0 |
+| **b1**  |  O coeficiente de regressão (B1 e B2) das primeiras variáveis independentes (também conhecido como o efeito que o aumento do valor da variável independente tem no valor de y previsto)|
+|**bn** | O coeficiente de regressão da última variável independente |
+|**e** |Erro do modelo (é a estimativa de variação que existe na estimação da variável dependente (ou y)|
+
+<p>&nbsp;</p>
+
+### **Matriz de Correlação**
+
+```{r}
+
+df.corr <- df[,-c(2,12)]
+
+df.corr = cor(df.corr)
+
+corrplot(df.corr, method="number")
+
+```
+
+<font size="4"> Através da matriz de correlação conseguimos visualizar as relações entre variáveis. Sendo assim cada célula da tabela mostra a conexão entre os dois fatores. Vale ressaltar que uma correlação forte entre duas variáveis analisadas não implica haver uma relação de causa e efeito.
+
+<p>&nbsp;</p>
+
+### **Visualizando as distribuições das variáveis do conjunto de dados**
+
+```{r}
+
+pairs.panels(df, col = "red")
+
+```
+
+
+### **Dividindo dados em treino e teste**
+
+```{r}
+
+split <- sample.split(df, SplitRatio = 0.7)
+
+train_data <-  subset(df, split == TRUE)
+test_data <- subset(df, split == FALSE)
+
+```
+
+<font size="4"> Para a elaboração do modelo, vamos separar os dados em conjuntos de treino e teste. Sendo assim os dados de treino serão utilizados ao modelo para o treinamento e criação do modelo, neste caso selecionamos 70% do conjunto de dados para treinamento. Já o conjunto de dados teste serão introduzidos no modelo, apos sua criação, dessa forma simulando previsões reais que o modelo realizará, permitindo assim que o desempenho real seja verificado. Neste caso foram utilizados o restante do conjunto de dados para testar o modelo (ou 30%) do conjunto de dados.
+
+<p>&nbsp;</p>
+
+### **Elaborando o modelo**
+
+
+
+```{r}
+
+
+model_1 <- lm(gripForce ~.,data = train_data );summary(model_1)
+
+```
+
+<font size="4"> Quando utilizamos o comando **summay(model_1)**, visualizamos que as variáveis que não foram significantes para ajudar a predizer a variável dependente (ou Y), foram systolic,sit.and.bend.forward_cm e height_cm.
+
+
+<font size="4"> Sendo assim elaboraremos um segundo modelo sem essas variáveis listados no parágrafo anterior, de modo a verificar se com a remoção dessas variáveis conseguimos obter um modelo que melhor explica o R2.
+
+<p>&nbsp;</p>
+
+### **Elaborando segundo modelo**
+
+```{r}
+
+model_2 <- lm(gripForce ~. -systolic -sit.and.bend.forward_cm - height_cm,data = train_data);summary(model_2)
+
+```
+
+###  **Explicando os termos apresentado na tabela acima.**
+
+Quando elaborado o segundo modelo, contendo somente as variáveis que foram significativas no modelo anterior, verificamos que todas as variáveis presentes na tabela demostram significância. Já quando analisamo o Multiple R-squared, visualizamos que o valor apresentou uma diferença mínima em relação ao modelo anterior.
+
+
+1. **Estimate** : A coluna Estimate nos dá os coeficientes para cada variável independente no modelo de regressão.
+
+
+2. **Std. Error** : Exibe o erro padrão da estimativa. Os números contidos nessa coluna mostra quanta variação existe em torno das estimativas do coeficiente do modelo (ou regressão). 
+
+3. **t value** : A estatística de teste usada na regressão linear é o valor t de um teste t bilateral . Quanto maior a estatística do teste, menos provável é que os resultados tenham ocorrido por acaso. 
+
+4. **Pr(>|t|)** : Essa coluna apresenta o valor p (ou probabilidade) de  valor t calculado ter ocorrido por acaso se a hipótese nula de nenhum efeito do parâmetro fosse verdadeira.Como esses valores são tão baixos ( p < 0,001 em ambos os casos), podemos rejeitar a hipótese nula e concluir que tanto ir de bicicleta para o trabalho quanto fumar provavelmente influenciam as taxas de doença cardíaca.
+
+5. **Adjusted R-squared** : É uma medida estatística de quão próximos os dados estão da linha de regressão ajustada. Sendo assim é a porcentagem da variação da variável dependente (ou resposta) explicada pelo modelo linear. O R-squaed fica entre 0 e 100%. 
+
+
+
+
+
+```{r}
+
+par(mfrow = c(2,2))
+plot(model_2)
+```
+
+<font size="4"> Os gráficos de resíduos são usados para procurar padrões subjacentes nos resíduos que podem significar que o modelo tem um problema.
+
+1. **Residuals vs Fitted** : Indica se existem padrões não lineares. Sendo assim quando elaboramos uma regressão linear correta, os dados precisam ser lineares, dessa forma visualizamos através do gráfico se essa condição foi atendida. Como podemos visualizar em nosso gráfico, verificamos que os resíduos ficam concentrados em torno da linha vermelha, não apresentando nenhum formato em curva ou (formato em V). 
+
+2. **Normal Q-Q** : Utilizamos o gráfico de normal Q-Q plot para visualizar se os resíduos são normalmente distribuídos. Em nosso caso os resíduos seguem perto de uma linha reta. Já quando visualizamos resíduos próximo da escala 4, podemos notar que os redisudos apresentam uma curva, isso indica que nosso modelo pode não apresentar bons desempenhos para valores mais altos.
+
+3. **Scale-Location** : Utilizamos o gráfico para verificar a homoscedasticidade. Então basicamente, verifica se os resíduos têm variância igual ao da linha de regressão. 
+
+4. **Residuals vs Leverange** : Esse gráfico é utilizado para verificação de casos influentes no banco de dados. Um caso influente é aquele que, se removido afetara o modelo, de modo que a exclusão ou inclusão deve ser considerada. Entao basicamente o objetivo desse gráfico é identificar dados que tenha alta influência no modelo desenvolvido.
+
+<p>&nbsp;</p>
+
+## **Utilizando a função predict no conjunto de dados teste**
+
+<p>&nbsp;</p>
+
+#### **Intervalo de confiança**
+
+O intervalo de confiança reflete a incerteza em torno das previsões médias. Vale ressaltar que o intervalo de confiança na tabela abaixo é de 95%.
+
+```{r}
+
+head(predict(model_2,newdata = test_data,interval = "confidence"))
+
+```
+
+1. **fit** Os valores de **Grip_Force** previstos para o conjunto de dados teste
+
+2. **lwr** limite inferior do intervalo de confiança para os valores esperados
+
+3. **upr** limite superior do intervalo de confiança para os valores esperados
+
+<p>&nbsp;</p>
+
+#### **Intervalo de previsão**
+
+O intervalo de previsão dá incerteza em torno de um único valor. Da mesma forma que os intervalos de confiança, os intervalos de predição podem ser calculados utilizando o comando abaixo.
+
+```{r}
+
+head(predict(model_2, newdata = test_data,interval = "prediction"))
+
+```
+
+<p>&nbsp;</p>
+
+## **Referências**
+
+**Regressão linear** : `(https://www.scribbr.com/statistics/linear-regression-in-r/)`;
+`(https://www.sheffield.ac.uk/polopoly_fs/1.536483!/file/MASH_multiple_regression_R.pdf)`
+
+
+**Análise dos resíduos** :`(https://rpubs.com/iabrady/residual-analysis/)`
+
+**Previsôes do modelo** : `(http://www.sthda.com/english/articles/40-regression-analysis/166-predict-in-r-model-predictions-and-confidence-intervals/)`
+
+**Base de dados** : `(https://www.kaggle.com/kukuroo3/body-performance-data)`
+
+<p>&nbsp;</p>
+
+## **Contato**
+
+Caso o leitor tenha encontrado algum erro ou queira sugerir alguma mudança, ou sugestão entre em contato através do E-mail : charles.b.ribeiro@gmail.com
+
+"Não tenha medo  de cometer erros, tenha medo de não aprender com eles - Peter Jones
